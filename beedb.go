@@ -14,7 +14,7 @@ var OnDebug = false
 var PluralizeTableNames = false
 
 type Model struct {
-	Db              *sql.DB
+	Db              DB
 	TableName       string
 	LimitStr        int
 	OffsetStr       int
@@ -31,10 +31,25 @@ type Model struct {
 	ParamIteration  int
 }
 
+type DB interface {
+	Prepare(query string) (*sql.Stmt, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+}
+
 /**
  * Add New sql.DB in the future i will add ConnectionPool.Get()
  */
-func New(db *sql.DB, options ...interface{}) (m Model) {
+func NewDB(db *sql.DB, options ...interface{}) (m Model) {
+	return New(db, options...)
+}
+
+func NewTx(tx *sql.Tx, options ...interface{}) (m Model) {
+	return New(tx, options...)
+}
+
+func New(db DB, options ...interface{}) (m Model) {
 	if len(options) == 0 {
 		m = Model{Db: db, ColumnStr: "*", PrimaryKey: "Id", QuoteIdentifier: "`", ParamIdentifier: "?", ParamIteration: 1}
 	} else if options[0] == "pg" {
