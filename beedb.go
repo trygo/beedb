@@ -157,7 +157,7 @@ func (orm *Model) Having(conditions string) *Model {
 func (orm *Model) Find(output interface{}) error {
 	orm.ScanPK(output)
 	var keys []string
-	results, err := scanStructIntoMap(output)
+	results, err := ScanStructIntoMap(output)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (orm *Model) Find(output interface{}) error {
 		return errors.New("No record found")
 	} else if len(resultsSlice) == 1 {
 		results := resultsSlice[0]
-		err := scanMapIntoStruct(output, results)
+		err := ScanMapIntoStruct(output, results)
 		if err != nil {
 			return err
 		}
@@ -201,7 +201,7 @@ func (orm *Model) FindAll(rowsSlicePtr interface{}) error {
 	sliceElementType := sliceValue.Type().Elem()
 	st := reflect.New(sliceElementType)
 	var keys []string
-	results, err := scanStructIntoMap(st.Interface())
+	results, err := ScanStructIntoMap(st.Interface())
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func (orm *Model) FindAll(rowsSlicePtr interface{}) error {
 
 	for _, results := range resultsSlice {
 		newValue := reflect.New(sliceElementType)
-		err := scanMapIntoStruct(newValue.Interface(), results)
+		err := ScanMapIntoStruct(newValue.Interface(), results)
 		if err != nil {
 			return err
 		}
@@ -395,7 +395,7 @@ func (orm *Model) Exec(finalQueryString string, args ...interface{}) (sql.Result
 //if the struct has PrimaryKey == 0 insert else update
 func (orm *Model) Save(output interface{}) error {
 	orm.ScanPK(output)
-	results, err := scanStructIntoMap(output)
+	results, err := ScanStructIntoMap(output)
 	if err != nil {
 		return err
 	}
@@ -566,7 +566,7 @@ func (orm *Model) Update(properties map[string]interface{}) (int64, error) {
 func (orm *Model) Delete(output interface{}) (int64, error) {
 	defer orm.InitModel()
 	orm.ScanPK(output)
-	results, err := scanStructIntoMap(output)
+	results, err := ScanStructIntoMap(output)
 	if err != nil {
 		return 0, err
 	}
@@ -610,7 +610,7 @@ func (orm *Model) DeleteAll(rowsSlicePtr interface{}) (int64, error) {
 		return 0, nil
 	}
 	for i := 0; i < val.Len(); i++ {
-		results, err := scanStructIntoMap(val.Index(i).Interface())
+		results, err := ScanStructIntoMap(val.Index(i).Interface())
 		if err != nil {
 			return 0, err
 		}
