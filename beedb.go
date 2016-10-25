@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+    "log"
 )
 
 var OnDebug = false
@@ -236,8 +237,8 @@ func (orm *Model) FindMap() (resultsSlice []map[string][]byte, err error) {
 	defer orm.InitModel()
 	sqls := orm.generateSql()
 	if OnDebug {
-		fmt.Println(sqls)
-		fmt.Println(orm)
+		log.Println(sqls)
+		log.Println(orm)
 	}
 	s, err := orm.Db.Prepare(sqls)
 	if err != nil {
@@ -469,8 +470,8 @@ func (orm *Model) Insert(properties map[string]interface{}) (int64, error) {
 		orm.QuoteIdentifier,
 		strings.Join(placeholders, ", "))
 	if OnDebug {
-		fmt.Println(statement)
-		fmt.Println(orm)
+		log.Println(statement)
+		log.Println(orm)
 	}
 	if orm.ParamIdentifier == "pg" {
 		statement = fmt.Sprintf("%v RETURNING %v", statement, snakeCasedName(orm.PrimaryKey))
@@ -548,8 +549,8 @@ func (orm *Model) Update(properties map[string]interface{}) (int64, error) {
 		strings.Join(updates, ", "),
 		condition)
 	if OnDebug {
-		fmt.Println(statement)
-		fmt.Println(orm)
+		log.Println(statement)
+		log.Println(orm)
 	}
 	res, err := orm.Exec(statement, args...)
 	if err != nil {
@@ -582,8 +583,8 @@ func (orm *Model) Delete(output interface{}) (int64, error) {
 		orm.QuoteIdentifier,
 		condition)
 	if OnDebug {
-		fmt.Println(statement)
-		fmt.Println(orm)
+		log.Println(statement)
+		log.Println(orm)
 	}
 	res, err := orm.Exec(statement)
 	if err != nil {
@@ -631,8 +632,8 @@ func (orm *Model) DeleteAll(rowsSlicePtr interface{}) (int64, error) {
 		orm.QuoteIdentifier,
 		condition)
 	if OnDebug {
-		fmt.Println(statement)
-		fmt.Println(orm)
+		log.Println(statement)
+		log.Println(orm)
 	}
 	res, err := orm.Exec(statement)
 	if err != nil {
@@ -660,8 +661,8 @@ func (orm *Model) DeleteRow() (int64, error) {
 		orm.QuoteIdentifier,
 		condition)
 	if OnDebug {
-		fmt.Println(statement)
-		fmt.Println(orm)
+		log.Println(statement)
+		log.Println(orm)
 	}
 	res, err := orm.Exec(statement, orm.ParamStr...)
 	if err != nil {
