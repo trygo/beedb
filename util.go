@@ -220,7 +220,39 @@ func ScanStructIntoMap(obj interface{}) (map[string]interface{}, error) {
 			if sqlTags[0] == "-" {
 				continue
 			}
+
+			//TODO: ADD by trywen@qq.com, support omitempty
+			if len(sqlTags) > 1 && sqlTags[1] == "omitempty" {
+				switch field.Type.Kind() {
+				case reflect.String:
+					if fieldv.Interface().(string) == "" {
+						continue
+					}
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					if fieldv.Int() == 0 {
+						continue
+					}
+				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+					if fieldv.Uint() == 0 {
+						continue
+					}
+				case reflect.Float32, reflect.Float64:
+					if fieldv.Float() == 0.0 {
+						continue
+					}
+				case reflect.Struct:
+					if fieldv.Type().String() == "time.Time" {
+						if fieldv.Interface().(time.Time).IsZero() {
+							continue
+						}
+
+					}
+				}
+
+			}
+
 			mapKey = sqlTags[0]
+
 		} else {
 			mapKey = fieldName
 		}
