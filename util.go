@@ -192,12 +192,17 @@ func scanMapElement(fieldv reflect.Value, field reflect.StructField, objMap map[
 	return nil
 }
 
-func ScanStructIntoMap(obj interface{}) (map[string]interface{}, error) {
+//for INSERT
+func ScanStructIntoMapForInsert(obj interface{}) (map[string]interface{}, error) {
+	return ScanStructIntoMap(obj, true)
+}
+
+func ScanStructIntoMap(obj interface{}, omitemptySupport ...bool) (map[string]interface{}, error) {
 	dataStruct := reflect.Indirect(reflect.ValueOf(obj))
 	if dataStruct.Kind() != reflect.Struct {
 		return nil, errors.New("expected a pointer to a struct")
 	}
-
+	omitemptyEnable := len(omitemptySupport) > 0 && omitemptySupport[0]
 	dataStructType := dataStruct.Type()
 
 	mapped := make(map[string]interface{})
@@ -222,7 +227,7 @@ func ScanStructIntoMap(obj interface{}) (map[string]interface{}, error) {
 			}
 
 			//TODO: ADD by trywen@qq.com, support omitempty
-			if len(sqlTags) > 1 && sqlTags[1] == "omitempty" {
+			if omitemptyEnable && len(sqlTags) > 1 && stringArrayContains("omitempty", sqlTags[1:]) {
 				switch field.Type.Kind() {
 				case reflect.String:
 					if fieldv.Interface().(string) == "" {
@@ -248,7 +253,6 @@ func ScanStructIntoMap(obj interface{}) (map[string]interface{}, error) {
 
 					}
 				}
-
 			}
 
 			mapKey = sqlTags[0]
@@ -265,7 +269,7 @@ func ScanStructIntoMap(obj interface{}) (map[string]interface{}, error) {
 
 		if inline {
 			// get an inner map and then put it inside the outer map
-			map2, err2 := ScanStructIntoMap(fieldv.Interface())
+			map2, err2 := ScanStructIntoMap(fieldv.Interface(), omitemptySupport...)
 			if err2 != nil {
 				return mapped, err2
 			}
